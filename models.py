@@ -3,7 +3,8 @@ from datetime import date
 
 from database import Base
 
-class Transaction(Base):
+
+class TransactionModel(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
