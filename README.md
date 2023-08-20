@@ -51,7 +51,7 @@ The Personal Finance Management API is a tool built using Python and FastAPI tha
 
 ## API Endpoints/Docs
 
-The API documentation will be available at "http://localhost:8000/docs"
+The API documentation will be available at `http://localhost:8000/docs`.
 
 ## Database
 
