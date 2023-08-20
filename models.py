@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, Integer, String, Date
 from datetime import date
 
-from .database import Base
+from database import Base
 
 class Transaction(Base):
     __tablename__ = "users"
