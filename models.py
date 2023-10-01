@@ -1,8 +1,9 @@
 from sqlalchemy import Boolean, Column, Integer, String, Date
 from datetime import date
+from sqlalchemy.orm import DeclarativeBase
 
-from database import Base
-
+class Base(DeclarativeBase):
+    pass
 
 class TransactionModel(Base):
     __tablename__ = "users"
