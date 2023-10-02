@@ -7,8 +7,10 @@ from copy import deepcopy
 
 
 def get_all():
+    # with statement needed so the session closes everytime
     with Session(engine) as session:
         return session.scalars(select(model)).all()
+        #without commit() engine rollbacks everytime
 
 
 def get_by_id(id: int):
@@ -24,6 +26,7 @@ def create_one(tr: TransactionCreate):
             "quantity": tr.quantity,
             "resolved": tr.resolved,
         }
+        # Deep copy for clone result before it gets flushed by commit()
         result = deepcopy(session.scalar(insert(model).returning(model), new_tr))
         session.commit()
         return result

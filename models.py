@@ -3,6 +3,8 @@ from datetime import date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from typing import List
 
+# SQLAlchemy models
+
 class Base(DeclarativeBase):
     pass
 

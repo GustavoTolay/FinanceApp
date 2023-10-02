@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 
+# pydantic models
 
 class TransactionBase(BaseModel):
     concept: str
