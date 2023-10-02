@@ -19,7 +19,7 @@ async def get_one_transaction(id: int):
     return tr.get_by_id(id)
 
 
-@app.delete("/transactions/{id}")
+@app.delete("/transactions/{id}", response_model=Transaction)
 async def delete_transaction(id: int):
     return tr.delete_by_id(id)
 
