@@ -4,7 +4,7 @@ from datetime import date
 
 class TransactionBase(BaseModel):
     concept: str
-    category: str
+    category_id: int
     quantity: int
     resolved: bool
 
