@@ -4,6 +4,9 @@ from models import Category as model
 from schemas import Category, CategoryCreate
 from database import engine
 from copy import deepcopy
+from fastapi import HTTPException
+
+err_404 = HTTPException(status_code=404, detail="Category not found")
 
 
 def get_all():
@@ -13,7 +16,10 @@ def get_all():
 
 def get_by_id(id: int):
     with Session(engine) as session:
-        return session.scalar(select(model).where(model.id == id))
+        result = session.scalar(select(model).where(model.id == id))
+        if result:
+            return result
+        raise err_404
 
 
 def create_one(cat: CategoryCreate):
@@ -21,7 +27,9 @@ def create_one(cat: CategoryCreate):
         new_cat = {"name": cat.name}
         result = deepcopy(session.scalar(insert(model).returning(model), new_cat))
         session.commit()
-        return result
+        if result:
+            return result
+        raise err_404
 
 
 def delete_by_id(id: int):
@@ -30,7 +38,9 @@ def delete_by_id(id: int):
             session.scalar(delete(model).where(model.id == id).returning(model))
         )
         session.commit()
-        return result
+        if result:
+            return result
+        raise err_404
 
 
 def update_one(cat: Category):
@@ -42,4 +52,6 @@ def update_one(cat: Category):
             )
         )
         session.commit()
-        return result
+        if result:
+            return result
+        raise err_404
