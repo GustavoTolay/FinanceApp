@@ -3,6 +3,7 @@ from datetime import date
 
 # pydantic models
 
+
 class TransactionBase(BaseModel):
     concept: str
     category_id: int
@@ -17,6 +18,21 @@ class TransactionCreate(TransactionBase):
 class Transaction(TransactionBase):
     id: int
     created: date
+
+    class Config:
+        orm_mode = True
+
+
+class CategoryBase(BaseModel):
+    name: str
+
+
+class CategoryCreate(CategoryBase):
+    pass
+
+
+class Category(CategoryBase):
+    id: int
 
     class Config:
         orm_mode = True

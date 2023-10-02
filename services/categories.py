@@ -1,19 +1,17 @@
 from sqlalchemy import select, insert, delete, update
 from sqlalchemy.orm import Session
-from models import Transaction as model
-from schemas import TransactionCreate, Transaction
+from models import Category as model
+from schemas import Category, CategoryCreate
 from database import engine
 from copy import deepcopy
 from fastapi import HTTPException
 
-err_404 = HTTPException(status_code=404, detail="Transaction not found")
+err_404 = HTTPException(status_code=404, detail="Category not found")
 
 
 def get_all():
-    # with statement needed so the session closes everytime
     with Session(engine) as session:
         return session.scalars(select(model)).all()
-        # without commit() engine rollbacks everytime
 
 
 def get_by_id(id: int):
@@ -24,16 +22,10 @@ def get_by_id(id: int):
         raise err_404
 
 
-def create_one(tr: TransactionCreate):
+def create_one(cat: CategoryCreate):
     with Session(engine) as session:
-        new_tr = {
-            "concept": tr.concept,
-            "category_id": tr.category_id,
-            "quantity": tr.quantity,
-            "resolved": tr.resolved,
-        }
-        # Deep copy for clone result before it gets flushed by commit()
-        result = deepcopy(session.scalar(insert(model).returning(model), new_tr))
+        new_cat = {"name": cat.name}
+        result = deepcopy(session.scalar(insert(model).returning(model), new_cat))
         session.commit()
         if result:
             return result
@@ -51,19 +43,12 @@ def delete_by_id(id: int):
         raise err_404
 
 
-def update_one(tr: Transaction):
+def update_one(cat: Category):
     with Session(engine) as session:
-        upd_tr = {
-            "id": tr.id,
-            "concept": tr.concept,
-            "category_id": tr.category_id,
-            "quantity": tr.quantity,
-            "resolved": tr.resolved,
-            "created": tr.created,
-        }
+        upd_cat = {"id": cat.id, "name": cat.name}
         result = deepcopy(
             session.scalar(
-                update(model).where(model.id == tr.id).values(upd_tr).returning(model)
+                update(model).where(model.id == cat.id).values(upd_cat).returning(model)
             )
         )
         session.commit()
