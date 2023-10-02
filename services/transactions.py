@@ -4,18 +4,24 @@ from models import Transaction as model
 from schemas import TransactionCreate, Transaction
 from database import engine
 from copy import deepcopy
+from fastapi import HTTPException
+
+err_404 = HTTPException(status_code=404, detail="Transaction not found")
 
 
 def get_all():
     # with statement needed so the session closes everytime
     with Session(engine) as session:
         return session.scalars(select(model)).all()
-        #without commit() engine rollbacks everytime
+        # without commit() engine rollbacks everytime
 
 
 def get_by_id(id: int):
     with Session(engine) as session:
-        return session.scalar(select(model).where(model.id == id))
+        result = session.scalar(select(model).where(model.id == id))
+        if result:
+            return result
+        raise err_404
 
 
 def create_one(tr: TransactionCreate):
@@ -29,7 +35,9 @@ def create_one(tr: TransactionCreate):
         # Deep copy for clone result before it gets flushed by commit()
         result = deepcopy(session.scalar(insert(model).returning(model), new_tr))
         session.commit()
-        return result
+        if result:
+            return result
+        raise err_404
 
 
 def delete_by_id(id: int):
@@ -38,7 +46,9 @@ def delete_by_id(id: int):
             session.scalar(delete(model).where(model.id == id).returning(model))
         )
         session.commit()
-        return result
+        if result:
+            return result
+        raise err_404
 
 
 def update_one(tr: Transaction):
@@ -57,4 +67,6 @@ def update_one(tr: Transaction):
             )
         )
         session.commit()
-        return result
+        if result:
+            return result
+        raise err_404
