@@ -1,44 +1,60 @@
+from sqlalchemy import select, insert, delete, update
 from sqlalchemy.orm import Session
-from models import TransactionModel as Model
+from models import Transaction as model
 from schemas import TransactionCreate, Transaction
+from database import engine
+from copy import deepcopy
 
 
-def get_all(db: Session):
-    return db.query(Model).all()
+def get_all():
+    # with statement needed so the session closes everytime
+    with Session(engine) as session:
+        return session.scalars(select(model)).all()
+        #without commit() engine rollbacks everytime
 
 
-def get_by_id(db: Session, id: int):
-    return db.query(Model).filter(Model.id == id).first()
+def get_by_id(id: int):
+    with Session(engine) as session:
+        return session.scalar(select(model).where(model.id == id))
 
 
-def create(db: Session, tr: TransactionCreate):
-    new_tr = Model(
-        concept=tr.concept,
-        category=tr.category,
-        quantity=tr.quantity,
-        resolved=tr.resolved,
-    )
-    db.add(new_tr)
-    db.commit()
-    db.refresh(new_tr)
-    return new_tr
+def create_one(tr: TransactionCreate):
+    with Session(engine) as session:
+        new_tr = {
+            "concept": tr.concept,
+            "category_id": tr.category_id,
+            "quantity": tr.quantity,
+            "resolved": tr.resolved,
+        }
+        # Deep copy for clone result before it gets flushed by commit()
+        result = deepcopy(session.scalar(insert(model).returning(model), new_tr))
+        session.commit()
+        return result
 
 
-def delete_by_id(db: Session, id: int):
-    db.query(Model).filter(Model.id == id).delete(synchronize_session="fetch")
-    db.commit()
-    return {"deleted": True}
+def delete_by_id(id: int):
+    with Session(engine) as session:
+        result = deepcopy(
+            session.scalar(delete(model).where(model.id == id).returning(model))
+        )
+        session.commit()
+        return result
 
 
-def update(db: Session, tr: Transaction):
-    db.query(Model).filter(Model.id == tr.id).update(
-        {
-            Model.concept: tr.concept,
-            Model.category: tr.category,
-            Model.quantity: tr.quantity,
-            Model.resolved: tr.resolved,
-        },
-        synchronize_session="fetch",
-    )
-    db.commit()
-    return db.query(Model).filter(Model.id == tr.id).first()
+def update_one(tr: Transaction):
+    with Session(engine) as session:
+        upd_tr = {
+            "id": tr.id,
+            "concept": tr.concept,
+            "category_id": tr.category_id,
+            "quantity": tr.quantity,
+            "resolved": tr.resolved,
+            "created": tr.created,
+        }
+        result = deepcopy(
+            session.scalar(
+                update(model).where(model.id == tr.id).values(upd_tr).returning(model)
+            )
+        )
+        session.commit()
+        return result

@@ -1,10 +1,11 @@
 from pydantic import BaseModel
 from datetime import date
 
+# pydantic models
 
 class TransactionBase(BaseModel):
     concept: str
-    category: str
+    category_id: int
     quantity: int
     resolved: bool
 
