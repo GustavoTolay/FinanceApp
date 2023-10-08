@@ -1,5 +1,5 @@
 from sqlalchemy import select, insert, delete, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from models import Transaction as model
 from schemas import TransactionCreate, Transaction
 from database import engine
@@ -12,13 +12,15 @@ err_404 = HTTPException(status_code=404, detail="Transaction not found")
 def get_all():
     # with statement needed so the session closes everytime
     with Session(engine) as session:
-        return session.scalars(select(model)).all()
+        query = select(model).options(joinedload(model.category))
+        return session.scalars(query).all()
         # without commit() engine rollbacks everytime
 
 
 def get_by_id(id: int):
     with Session(engine) as session:
-        result = session.scalar(select(model).where(model.id == id))
+        query = select(model).options(joinedload(model.category)).where(model.id == id)
+        result = session.scalar(query)
         if result:
             return result
         raise err_404
@@ -30,6 +32,7 @@ def create_one(tr: TransactionCreate):
             "concept": tr.concept,
             "category_id": tr.category_id,
             "quantity": tr.quantity,
+            "is_income": tr.is_income,
             "resolved": tr.resolved,
         }
         # Deep copy for clone result before it gets flushed by commit()
@@ -58,6 +61,7 @@ def update_one(tr: Transaction):
             "concept": tr.concept,
             "category_id": tr.category_id,
             "quantity": tr.quantity,
+            "is_income": tr.is_income,
             "resolved": tr.resolved,
             "created": tr.created,
         }
