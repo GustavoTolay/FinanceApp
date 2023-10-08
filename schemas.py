@@ -8,6 +8,7 @@ class TransactionBase(BaseModel):
     concept: str
     category_id: int
     quantity: int
+    is_income: bool
     resolved: bool
 
 
@@ -36,3 +37,9 @@ class Category(CategoryBase):
 
     class Config:
         orm_mode = True
+
+
+# response models
+class TransactionJoin(Transaction):
+    category: Category
+    

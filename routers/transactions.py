@@ -1,16 +1,16 @@
 from fastapi import APIRouter
-from schemas import Transaction, TransactionCreate
+from schemas import Transaction, TransactionCreate, TransactionJoin
 import services.transactions as tr
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
 
-@router.get("/", response_model=list[Transaction])
+@router.get("/", response_model=list[TransactionJoin])
 async def get_all_():
     return tr.get_all()
 
 
-@router.get("/{id}", response_model=Transaction)
+@router.get("/{id}", response_model=TransactionJoin)
 async def get_one_transaction(id: int):
     return tr.get_by_id(id)
 
